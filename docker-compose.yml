@@ -1,8 +1,6 @@
 alert-conf:
   tty: true
   image: abhijeetka/alert-conf:v0.1
-  links:
-  - prometheus:prometheus
   volumes:
   - /etc/alertmanager/
 graf-db:
@@ -11,8 +9,8 @@ graf-db:
   tty: true
   image: rucknar/graf-db:02
   links:
-  - rancher-api-integration:rancher-api-integration
   - prometheus:prometheus
+  - rancher-api-integration:rancher-api-integration
   volumes:
   - /var/lib/grafana/
 prometheus:
@@ -27,11 +25,11 @@ prometheus:
   - -web.console.libraries=/etc/prometheus/console_libraries
   - -web.console.templates=/etc/prometheus/consoles
   tty: true
-  image: prom/prometheus:0.17.0
+  image: amolsh/prometheus-server:2.0
   links:
   - ranch-eye:ranch-eye
-  - node-exporter:node-exporter
   - rancher-api-integration:rancher-api-integration
+  - node-exporter:node-exporter
   - alertmanager:alertmanager
   volumes_from:
   - prom-conf
@@ -43,8 +41,8 @@ grafana:
   tty: true
   image: grafana/grafana:2.6.0
   links:
-  - rancher-api-integration:rancher-api-integration
   - prometheus:prometheus
+  - rancher-api-integration:rancher-api-integration
   volumes_from:
   - graf-db
 prom-conf:
@@ -52,8 +50,8 @@ prom-conf:
   image: rucknar/prom-conf:08
   links:
   - ranch-eye:ranch-eye
-  - node-exporter:node-exporter
   - rancher-api-integration:rancher-api-integration
+  - node-exporter:node-exporter
   - alertmanager:alertmanager
   volumes:
   - /etc/prom-conf/
@@ -66,11 +64,11 @@ alertmanager:
   - -config.file=/etc/alertmanager/alertmanager.conf
   tty: true
   image: prom/alertmanager
-  links:
-  - prometheus:prometheus
   volumes_from:
   - alert-conf
-  stdin_open: true
+  stdin_open: true  
+  links:
+  - prometheus:prometheus
 rancher-api-integration:
   labels:
     io.rancher.container.create_agent: 'true'
