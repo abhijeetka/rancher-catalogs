@@ -1,0 +1,39 @@
+prometheus:
+  ports:
+  - 9090:9090/tcp
+  labels:
+    io.rancher.sidekicks: prom-conf
+  command:
+  - -alertmanager.url=http://alertmanager:9093
+  - -config.file=/etc/prom-conf/prometheus.yml
+  - -storage.local.path=/prometheus
+  - -web.console.libraries=/etc/prometheus/console_libraries
+  - -web.console.templates=/etc/prometheus/consoles
+  tty: true
+  image: prom/prometheus:master
+  volumes_from:
+  - prom-conf
+prom-conf:
+  tty: true
+  image: abhijeetka/prom-conf:v0.1  
+  volumes:
+  - /etc/prom-conf/
+alert-conf:
+  tty: true
+  image: abhijeetka/alert-conf:v0.1.2
+  volumes:
+  - /etc/alertmanager/
+alertmanager:
+  ports:
+  - 9093:9093/tcp
+  labels:
+    io.rancher.sidekicks: alert-conf
+  command:
+  - -config.file=/etc/alertmanager/alertmanager.yml
+  tty: true
+  image: prom/alertmanager:master
+  volumes_from:
+  - alert-conf
+  stdin_open: true  
+  links:
+  - prometheus:prometheus
