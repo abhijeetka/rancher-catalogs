@@ -1,6 +1,6 @@
 alert-conf:
   tty: true
-  image: abhijeetka/alert-conf:v0.1
+  image: abhijeetka/alert-conf:v0.1.1
   volumes:
   - /etc/alertmanager/
 graf-db:
