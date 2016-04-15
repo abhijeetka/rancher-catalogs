@@ -61,7 +61,7 @@ alertmanager:
   labels:
     io.rancher.sidekicks: alert-conf
   command:
-  - -config.file=/etc/alertmanager/alertmanager.conf
+  - -config.file=/etc/alertmanager/alertmanager.yml
   tty: true
   image: prom/alertmanager:master
   volumes_from:
