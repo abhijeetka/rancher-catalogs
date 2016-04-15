@@ -47,7 +47,7 @@ grafana:
   - graf-db
 prom-conf:
   tty: true
-  image: rucknar/prom-conf:08
+  image: abhijeetka/prom-conf:v0.1
   links:
   - ranch-eye:ranch-eye
   - rancher-api-integration:rancher-api-integration
