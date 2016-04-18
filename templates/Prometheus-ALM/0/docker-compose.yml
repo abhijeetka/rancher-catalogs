@@ -12,7 +12,7 @@ graf-db:
   - prometheus:prometheus
   - rancher-api-integration:rancher-api-integration
   volumes:
-  - /var/lib/grafana/
+  - /grafana:/var/lib/grafana/
 prometheus:
   ports:
   - 9090:9090/tcp
@@ -27,10 +27,10 @@ prometheus:
   tty: true
   image: prom/prometheus:master
   links:
-  - ranch-eye:ranch-eye
-  - rancher-api-integration:rancher-api-integration
-  - node-exporter:node-exporter
   - alertmanager:alertmanager
+  - node-exporter:node-exporter
+  - rancher-api-integration:rancher-api-integration
+  - ranch-eye:ranch-eye
   volumes_from:
   - prom-conf
 grafana:
@@ -49,10 +49,10 @@ prom-conf:
   tty: true
   image: abhijeetka/prom-conf:v0.1
   links:
-  - ranch-eye:ranch-eye
-  - rancher-api-integration:rancher-api-integration
-  - node-exporter:node-exporter
   - alertmanager:alertmanager
+  - node-exporter:node-exporter
+  - rancher-api-integration:rancher-api-integration
+  - ranch-eye:ranch-eye
   volumes:
   - /etc/prom-conf/
 alertmanager:
@@ -66,15 +66,7 @@ alertmanager:
   image: prom/alertmanager:master
   volumes_from:
   - alert-conf
-  stdin_open: true  
-  links:
-  - prometheus:prometheus
-rancher-api-integration:
-  labels:
-    io.rancher.container.create_agent: 'true'
-    io.rancher.container.agent.role: environment
-  tty: true
-  image: rucknar/prometheus-rancher-exporter:01
+  stdin_open: true
 influxdb:
   ports:
   - 2003:2003/tcp
@@ -86,6 +78,12 @@ influxdb:
     GRAPHITE_DB: rancher
     PRE_CREATE_DB: grafana;prometheus;rancher
   image: tutum/influxdb:0.10
+rancher-api-integration:
+  labels:
+    io.rancher.container.create_agent: 'true'
+    io.rancher.container.agent.role: environment
+  tty: true
+  image: rucknar/prometheus-rancher-exporter:01
 ranch-eye:
   ports:
   - 9104:9104/tcp
