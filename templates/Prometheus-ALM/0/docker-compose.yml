@@ -1,4 +1,6 @@
 alert-conf:
+  command:
+  - cat
   tty: true
   image: abhijeetka/alert-conf:latest
   volumes:
@@ -27,10 +29,10 @@ prometheus:
   tty: true
   image: prom/prometheus:master
   links:
-  - alertmanager:alertmanager
-  - node-exporter:node-exporter
-  - rancher-api-integration:rancher-api-integration
   - ranch-eye:ranch-eye
+  - alertmanager:alertmanager
+  - rancher-api-integration:rancher-api-integration
+  - node-exporter:node-exporter
   volumes_from:
   - prom-conf
 grafana:
@@ -49,12 +51,23 @@ prom-conf:
   tty: true
   image: abhijeetka/prom-conf:v0.1
   links:
-  - alertmanager:alertmanager
-  - node-exporter:node-exporter
-  - rancher-api-integration:rancher-api-integration
   - ranch-eye:ranch-eye
+  - alertmanager:alertmanager
+  - rancher-api-integration:rancher-api-integration
+  - node-exporter:node-exporter
   volumes:
   - /etc/prom-conf/
+influxdb:
+  ports:
+  - 2003:2003/tcp
+  - 8083:8083/tcp
+  - 8086:8086/tcp
+  - 8090:8090/tcp
+  environment:
+    GRAPHITE_BINDING: :2003
+    GRAPHITE_DB: rancher
+    PRE_CREATE_DB: grafana;prometheus;rancher
+  image: tutum/influxdb:0.10
 alertmanager:
   ports:
   - 9093:9093/tcp
@@ -67,33 +80,12 @@ alertmanager:
   volumes_from:
   - alert-conf
   stdin_open: true
-influxdb:
-  ports:
-  - 2003:2003/tcp
-  - 8083:8083/tcp
-  - 8086:8086/tcp
-  - 8090:8090/tcp
-  environment:
-    GRAPHITE_BINDING: :2003
-    GRAPHITE_DB: rancher
-    PRE_CREATE_DB: grafana;prometheus;rancher
-  image: tutum/influxdb:0.10
 rancher-api-integration:
   labels:
     io.rancher.container.create_agent: 'true'
     io.rancher.container.agent.role: environment
   tty: true
   image: rucknar/prometheus-rancher-exporter:01
-ranch-eye:
-  ports:
-  - 9104:9104/tcp
-  labels:
-    io.rancher.scheduler.global: 'true'
-    io.rancher.container.dns: 'true'
-  tty: true
-  image: rucknar/ranch-eye:01
-  stdin_open: true
-  net: host
 node-exporter:
   ports:
   - 9100:9100/tcp
@@ -102,6 +94,16 @@ node-exporter:
     io.rancher.container.dns: 'true'
   tty: true
   image: prom/node-exporter:latest
+  stdin_open: true
+  net: host
+ranch-eye:
+  ports:
+  - 9104:9104/tcp
+  labels:
+    io.rancher.scheduler.global: 'true'
+    io.rancher.container.dns: 'true'
+  tty: true
+  image: rucknar/ranch-eye:01
   stdin_open: true
   net: host
 
