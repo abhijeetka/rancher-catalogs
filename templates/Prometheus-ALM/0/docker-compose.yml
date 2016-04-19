@@ -12,7 +12,7 @@ graf-db:
   - prometheus:prometheus
   - rancher-api-integration:rancher-api-integration
   volumes:
-  - /grafana:/var/lib/grafana/
+  - /var/lib/grafana/
 prometheus:
   ports:
   - 9090:9090/tcp
