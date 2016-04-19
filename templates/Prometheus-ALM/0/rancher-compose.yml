@@ -1,3 +1,10 @@
+.catalog:
+  name: "Prometheus-ALM Stack"
+  version: "1.0.5"
+  description: "Prometheus Monitoring Solution for LAMP-81 Server"
+  uuid: prometheus-1
+  minimum_rancher_version: v0.56.0
+
 alert-conf:
   scale: 1
 graf-db:
