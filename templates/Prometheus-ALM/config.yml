@@ -1,5 +1,5 @@
 name: Prometheus-ALM-LAMP
 description: |
-  Prometheus and friends, auto-discovering monitoring solution for Rancher deployments for LMAP Demo.
+  Prometheus and friends, auto-discovering monitoring solution for Rancher deployments for LAMP Demo.
 version: 0.6
 category: Monitoring
