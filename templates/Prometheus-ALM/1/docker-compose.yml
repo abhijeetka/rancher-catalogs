@@ -1,0 +1,108 @@
+alert-conf:
+  environment:
+    EMAIL: ${EMAIL}
+  tty: true 
+  image: abhijeetka/alert-config:v2.2
+  volumes:
+  - /etc/alertmanager/
+alertmanager:
+  ports:
+  - 9093:9093/tcp
+  labels:
+    io.rancher.sidekicks: alert-conf
+  command:
+  - -config.file=/etc/alertmanager/alertmanager.yml
+  tty: true
+  image: prom/alertmanager:master
+  volumes_from:
+  - alert-conf
+  stdin_open: true
+graf-db:
+  command:
+  - cat
+  tty: true
+  image: rucknar/graf-db:latest
+  links:
+  - prometheus:prometheus
+  - rancher-api-integration:rancher-api-integration
+  volumes:
+  - /var/lib/grafana/
+prometheus:
+  ports:
+  - 9090:9090/tcp
+  labels:
+    io.rancher.sidekicks: prom-conf
+  command:
+  - -alertmanager.url=http://alertmanager:9093
+  - -config.file=/etc/prom-conf/prometheus.yml
+  - -storage.local.path=/prometheus
+  - -web.console.libraries=/etc/prometheus/console_libraries
+  - -web.console.templates=/etc/prometheus/consoles
+  tty: true
+  image: prom/prometheus:master
+  links:
+  - ranch-eye:ranch-eye
+  - alertmanager:alertmanager
+  - rancher-api-integration:rancher-api-integration
+  - node-exporter:node-exporter
+  volumes_from:
+  - prom-conf
+grafana:
+  ports:
+  - 3000:3000/tcp
+  labels:
+    io.rancher.sidekicks: graf-db
+  tty: true
+  image: grafana/grafana:2.6.0
+  links:
+  - prometheus:prometheus
+  - rancher-api-integration:rancher-api-integration
+  volumes_from:
+  - graf-db
+prom-conf:
+  tty: true
+  image: abhijeetka/prom-config:v1.0
+  links:
+  - ranch-eye:ranch-eye
+  - alertmanager:alertmanager
+  - rancher-api-integration:rancher-api-integration
+  - node-exporter:node-exporter
+  volumes:
+  - /etc/prom-conf/
+influxdb:
+  ports:
+  - 2003:2003/tcp
+  - 8083:8083/tcp
+  - 8086:8086/tcp
+  - 8090:8090/tcp
+  environment:
+    GRAPHITE_BINDING: :2003
+    GRAPHITE_DB: rancher
+    PRE_CREATE_DB: grafana;prometheus;rancher
+  image: tutum/influxdb:0.10
+rancher-api-integration:
+  labels:
+    io.rancher.container.create_agent: 'true'
+    io.rancher.container.agent.role: environment
+  tty: true
+  image: rucknar/prometheus-rancher-exporter:01
+node-exporter:
+  ports:
+  - 9100:9100/tcp
+  labels:
+    io.rancher.scheduler.global: 'true'
+    io.rancher.container.dns: 'true'
+  tty: true
+  image: prom/node-exporter:latest
+  stdin_open: true
+  net: host
+ranch-eye:
+  ports:
+  - 9104:9104/tcp
+  labels:
+    io.rancher.scheduler.global: 'true'
+    io.rancher.container.dns: 'true'
+  tty: true
+  image: rucknar/ranch-eye:01
+  stdin_open: true
+  net: host
